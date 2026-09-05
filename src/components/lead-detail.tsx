@@ -850,7 +850,9 @@ function ReassignDialog({
         </DialogHeader>
         <Select value={ownerId} onValueChange={(value) => value && setOwnerId(value)}>
           <SelectTrigger className="w-full">
-            <SelectValue />
+            <SelectValue>
+              {people.find((person) => person.id === ownerId)?.name ?? "Owner"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {people.map((person) => (
@@ -1113,7 +1115,16 @@ function TestDriveDialog({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(() => {
+                    const linked = lead.linkableAppointments.find(
+                      (item) => item.id === appointmentId,
+                    );
+                    return linked
+                      ? formatDateTime(new Date(linked.scheduledAt))
+                      : "No appointment";
+                  })()}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No appointment</SelectItem>

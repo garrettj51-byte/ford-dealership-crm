@@ -22,6 +22,8 @@ export function UserSwitcher({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const currentName =
+    people.find((person) => person.id === currentUserId)?.name ?? "Salesperson";
 
   return (
     <Select
@@ -40,7 +42,7 @@ export function UserSwitcher({
         className="h-8 max-w-[11rem] border-white/20 bg-white/10 text-white hover:bg-white/15"
         aria-label="On the floor as"
       >
-        <SelectValue />
+        <SelectValue>{currentName}</SelectValue>
       </SelectTrigger>
       <SelectContent align="end" alignItemWithTrigger={false}>
         {people.map((person) => (
