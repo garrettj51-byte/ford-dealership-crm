@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  WORKING
+  APPT_SET
+  SOLD
+  LOST
+  DEAD
+}
+
+enum TaskType {
+  CALL
+  TEXT
+  EMAIL
+  APPOINTMENT
+  FOLLOW_UP
+  OTHER
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  SHOWED
+  NO_SHOW
+  CANCELLED
+  RESCHEDULED
+}
+
+enum ActivityType {
+  LEAD_CREATED
+  NOTE
+  CALL
+  SMS
+  EMAIL
+  STATUS_CHANGE
+  OWNER_CHANGE
+  TASK_CREATED
+  TASK_COMPLETED
+  TASK_CANCELLED
+  APPOINTMENT
+  TEST_DRIVE
+}
+
+enum MessageChannel {
+  SMS
+  EMAIL
+}
+
+enum MessageSendStatus {
+  SENT
+  BLOCKED_OPTOUT
+  FAILED
+}
+
+model Salesperson {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+
+  ownedLeads Lead[]       @relation("LeadOwner")
+  ownedTasks Task[]
+  activities Activity[]
+  messages   MessageLog[]
+}
+
+model Lead {
+  id              String     @id @default(cuid())
+  firstName       String
+  lastName        String
+  phone           String?
+  email           String?
+  vehicleInterest String?
+  status          LeadStatus @default(NEW)
+  lostReason      String?
+  ownerId         String
+  owner           Salesperson @relation("LeadOwner", fields: [ownerId], references: [id])
+  smsOptOut       Boolean    @default(false)
+  emailOptOut     Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  tasks        Task[]
+  activities   Activity[]
+  appointments Appointment[]
+  testDrives   TestDrive[]
+  messages     MessageLog[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  leadId      String
+  lead        Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       Salesperson @relation(fields: [ownerId], references: [id])
+  type        TaskType
+  title       String
+  dueAt       DateTime
+  status      TaskStatus @default(OPEN)
+  createdAt   DateTime   @default(now())
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  @@index([leadId, status])
+  @@index([ownerId, status, dueAt])
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  leadId    String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actorId   String
+  actor     Salesperson  @relation(fields: [actorId], references: [id])
+  type      ActivityType
+  body      String
+  metadata  String?
+  createdAt DateTime     @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  leadId      String
+  lead        Lead              @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  testDrives  TestDrive[]
+
+  @@index([leadId])
+}
+
+model TestDrive {
+  id            String       @id @default(cuid())
+  leadId        String
+  lead          Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  vehicle       String
+  occurredAt    DateTime
+  note          String?
+  createdAt     DateTime     @default(now())
+
+  @@index([leadId])
+}
+
+model MessageLog {
+  id        String            @id @default(cuid())
+  leadId    String
+  lead      Lead              @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actorId   String
+  actor     Salesperson       @relation(fields: [actorId], references: [id])
+  channel   MessageChannel
+  to        String
+  subject   String?
+  body      String
+  status    MessageSendStatus
+  createdAt DateTime          @default(now())
+
+  @@index([leadId])
+}
