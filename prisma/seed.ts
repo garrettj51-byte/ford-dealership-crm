@@ -3,8 +3,14 @@ import {
   type LeadStatus,
   type TaskType,
 } from "@prisma/client";
+import { parseInTz, ymdInTz } from "@/lib/time";
 
 const prisma = new PrismaClient();
+
+/** A fixed clock time on the current dealership-timezone day. */
+function todayAt(hm: string) {
+  return parseInTz(ymdInTz(new Date()), hm);
+}
 
 function hoursAgo(hours: number) {
   return new Date(Date.now() - hours * 60 * 60 * 1000);
@@ -16,10 +22,6 @@ function hoursFromNow(hours: number) {
 
 function daysAgo(days: number) {
   return hoursAgo(days * 24);
-}
-
-function daysFromNow(days: number) {
-  return hoursFromNow(days * 24);
 }
 
 async function main() {
@@ -213,7 +215,7 @@ async function main() {
     task: {
       type: "APPOINTMENT",
       title: "Appointment",
-      dueAt: hoursFromNow(4),
+      dueAt: todayAt("15:00"),
     },
     activities: [
       {
@@ -234,7 +236,7 @@ async function main() {
   await prisma.appointment.create({
     data: {
       leadId: tom.id,
-      scheduledAt: hoursFromNow(4),
+      scheduledAt: todayAt("15:00"),
       status: "SCHEDULED",
       notes: "Bring trade — 2018 Escape",
     },
