@@ -88,6 +88,7 @@ async function main() {
         | "TEST_DRIVE";
       body: string;
       createdAt?: Date;
+      metadata?: Record<string, unknown>;
     }>;
   }) {
     const created = await prisma.lead.create({
@@ -127,6 +128,7 @@ async function main() {
           type: item.type,
           body: item.body,
           createdAt: item.createdAt,
+          metadata: item.metadata ? JSON.stringify(item.metadata) : undefined,
         },
       });
     }
@@ -211,7 +213,7 @@ async function main() {
     task: {
       type: "APPOINTMENT",
       title: "Appointment",
-      dueAt: daysFromNow(1),
+      dueAt: hoursFromNow(4),
     },
     activities: [
       {
@@ -232,7 +234,7 @@ async function main() {
   await prisma.appointment.create({
     data: {
       leadId: tom.id,
-      scheduledAt: daysFromNow(1),
+      scheduledAt: hoursFromNow(4),
       status: "SCHEDULED",
       notes: "Bring trade — 2018 Escape",
     },
@@ -300,7 +302,8 @@ async function main() {
         actorId: garrett.id,
         type: "STATUS_CHANGE",
         body: "Working → Sold",
-        createdAt: daysAgo(10),
+        createdAt: daysAgo(3),
+        metadata: { from: "WORKING", to: "SOLD" },
       },
     ],
   });
