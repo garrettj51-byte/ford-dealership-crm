@@ -64,6 +64,28 @@ export function endOfDayInTz(date: Date, tz = DEALERSHIP_TZ): Date {
   return parseInTz(ymdInTz(date, tz), "23:59", tz);
 }
 
+export function startOfMonthInTz(date: Date, tz = DEALERSHIP_TZ): Date {
+  const { year, month } = tzParts(date, tz);
+  const ymd = `${year}-${String(month).padStart(2, "0")}-01`;
+  return parseInTz(ymd, "00:00", tz);
+}
+
+export function formatMonthYear(date: Date, tz = DEALERSHIP_TZ): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatClock(date: Date, tz = DEALERSHIP_TZ): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
 export function addCalendarDays(ymd: string, days: number): string {
   const [year, month, day] = ymd.split("-").map(Number);
   const utc = new Date(Date.UTC(year, month - 1, day + days));

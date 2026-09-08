@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { LayoutDashboard, Search } from "lucide-react";
 import { UserSwitcher } from "@/components/user-switcher";
 import { Toaster } from "@/components/toaster";
 
@@ -25,6 +25,13 @@ export function AppShell({
             <div className="text-base font-semibold leading-tight tracking-tight">
               Floor CRM
             </div>
+          </Link>
+          <Link
+            href="/dashboard"
+            aria-label="Dashboard"
+            className="inline-flex size-9 items-center justify-center rounded-lg text-white/90 hover:bg-white/10"
+          >
+            <LayoutDashboard className="size-5" />
           </Link>
           <Link
             href="/search"
